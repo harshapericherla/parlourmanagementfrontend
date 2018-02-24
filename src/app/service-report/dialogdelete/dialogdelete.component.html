@@ -1,0 +1,10 @@
+<div class="container">
+  <h1 mat-dialog-title>DELETE CONFIRMATION</h1>
+  <div mat-dialog-content>
+      <p>Delete this Record?</p>
+  </div>
+  <div mat-dialog-actions class="actions">
+      <button mat-raised-button (click)="onNoClick()" cdkFocusInitial>Cancel</button>
+      <button mat-raised-button color="warn" [mat-dialog-close]="true">Delete</button>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+
+<div class="container">
+  <div class="btn-group">
+    <button mat-raised-button color="primary" (click)="openDialog('add')" class="abutton">Add</button>
+    <button mat-raised-button color="warn" class="abutton" (click)="openDeleteDialog()">Delete</button>
+    <button mat-raised-button color="primary" (click)="openDialog('edit')" class="abutton">Edit</button>
+  </div>
+</div>
+
+<div class="container mat-elevation-z8">
+    <div class="loading-shade"
+       *ngIf="isLoadingResults">
+    <mat-spinner *ngIf="isLoadingResults"></mat-spinner>
+    
+  </div>
+    <mat-table #table [dataSource]="dataSource" matSort matSortActive="fullName" matSortDisableClear matSortDirection="asc">
+  
+      <!--- Note that these columns can be defined in any order.
+            The actual rendered columns are set as a property on the row definition" -->
+  
+      <!-- Position Column -->
+      <ng-container matColumnDef="Client">
+        <mat-header-cell *matHeaderCellDef  mat-sort-header="fullName" class="header"> Client </mat-header-cell>
+        <mat-cell *matCellDef="let element"  
+        [ngClass]="{'cellhighlight': selectedRowIndex == element.serviceReportId ,
+        'cells': selectedRowIndex != element.serviceReportId}"> 
+                {{element.clientBean.fullName}} 
+        </mat-cell>
+      </ng-container>
+  
+      <!-- Name Column -->
+      <ng-container matColumnDef="Service">
+        <mat-header-cell *matHeaderCellDef mat-sort-header="serviceName" class="header"> Service </mat-header-cell>
+        <mat-cell *matCellDef="let element"  
+        [ngClass]="{'cellhighlight': selectedRowIndex == element.serviceReportId ,
+        'cells': selectedRowIndex != element.serviceReportId}"> 
+               {{element.serviceBean.serviceName}} 
+      </mat-cell>
+      </ng-container>
+  
+      <!-- Weight Column -->
+      <ng-container matColumnDef="Staff">
+        <mat-header-cell *matHeaderCellDef mat-sort-header="staffName" class="header"> Staff </mat-header-cell>
+        <mat-cell *matCellDef="let element"  
+        [ngClass]="{'cellhighlight': selectedRowIndex == element.serviceReportId ,
+        'cells': selectedRowIndex != element.serviceReportId}"> 
+              {{element.staffBean.staffName}} 
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="Cost">
+          <mat-header-cell *matHeaderCellDef class="header"> Cost </mat-header-cell>
+          <mat-cell *matCellDef="let element"  
+          [ngClass]="{'cellhighlight': selectedRowIndex == element.serviceReportId ,
+          'cells': selectedRowIndex != element.serviceReportId}"> 
+                {{element.serviceBean.serviceCost | discount:element.serviceDiscount}} 
+          </mat-cell>
+      </ng-container>
+
+
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+       (click)="rowSelected(row)"
+       [ngClass]="{'highlight': selectedRowIndex == row.serviceReportId}"></mat-row>
+    </mat-table>
+
+    <div class="pagination">
+        <mat-paginator [length]="resultsLength" [pageSize]="pageSize">
+          </mat-paginator>
+    </div>
+    
+  </div>
+  

@@ -1,0 +1,66 @@
+<div class="container">
+  <h1 mat-dialog-title>{{type}} DETAILS</h1>
+  <form [formGroup]="addForm">
+      <div mat-dialog-content>
+            
+          <mat-form-field>
+              <input type="text" id="service" matInput [formControl] = "addForm.controls['service']" placeholder="{{type | camelcase}} Service"
+               [matAutocomplete]="serviceauto"  (blur)="applyCamelCase('service')">
+          </mat-form-field>
+          <mat-autocomplete #serviceauto="matAutocomplete"> 
+              <mat-option *ngFor="let service of servicesFiltered | async" [value]="service">
+                {{ service }}
+              </mat-option>
+          </mat-autocomplete>
+
+          <mat-form-field>
+              <input type="text" matInput [formControl] = "addForm.controls['client']" placeholder="{{type | camelcase}} Client"
+               [matAutocomplete]="clientauto" (blur)="applyCamelCase('client')">
+          </mat-form-field>
+          <mat-autocomplete #clientauto="matAutocomplete">
+              <mat-option *ngFor="let client of clientsFiltered | async" [value]="client">
+                {{ client }}
+              </mat-option>
+          </mat-autocomplete>
+        
+          <mat-form-field>
+                <input type="text" matInput [formControl] = "addForm.controls['phoneNumber']" placeholder="{{type | camelcase}} Phone.No">
+          </mat-form-field>
+
+          <mat-form-field>
+              <input type="text" matInput [formControl] = "addForm.controls['staff']" placeholder="{{type | camelcase}} Staff"
+               [matAutocomplete]="staffauto" (blur)="applyCamelCase('staff')">
+          </mat-form-field>
+          <mat-autocomplete #staffauto="matAutocomplete">
+              <mat-option *ngFor="let staff of staffsFiltered | async" [value]="staff">
+                {{ staff }}
+              </mat-option>
+          </mat-autocomplete>
+          
+          <div *ngIf="addForm.controls['service'].value">
+            <mat-form-field >
+                    <input type="text" matInput [formControl] = "addForm.controls['serviceCost']" placeholder="{{type | camelcase}} Cost">
+            </mat-form-field>
+            
+            <mat-form-field *ngIf="!oldServiceCostIsNaN()">
+                    <input type="text" matInput [formControl] = "addForm.controls['serviceDiscount']" placeholder="Discount">
+            </mat-form-field>
+          </div>
+
+          <mat-form-field class="example-full-width">
+                <input matInput [formControl] = "addForm.controls['serviceReportDate']" [matDatepicker]="picker" placeholder="Choose a date">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker touchUi="true" #picker></mat-datepicker>
+          </mat-form-field>
+
+          <input type="hidden" name="serviceId"  [formControl] = "addForm.controls['serviceId']" />
+          <input type="hidden" name="clientId"  [formControl] = "addForm.controls['clientId']"/>
+          <input type="hidden" name="staffId"  [formControl] = "addForm.controls['staffId']"/>
+      </div>
+
+    <div mat-dialog-actions>
+        <button mat-raised-button (click)="onNoClick()">Close</button>
+        <button mat-raised-button [disabled] = "!isSubmitEnabled"  color="primary" [mat-dialog-close]="addForm.value" cdkFocusInitial>Submit</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,10 @@
+h1{
+    font-weight: bold;
+    
+}
+.container{
+    padding-left: 10px;
+}
+.error{
+    color:red;
+}

@@ -1,0 +1,58 @@
+.deleteAndEdit{
+    white-space: pre-line
+}
+.abutton{
+   margin:10px;
+  
+}
+
+  
+  .header{
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color:rgba(42, 4, 85, 0.7);
+  }
+  
+  .cells{
+    font-size: 13px;
+    color:rgba(8, 8, 8, 0.7);
+  }
+
+  .header,.pagination{
+    font-size: 15px;
+  }
+  .pagination,.cells,.header,.cellhighlight{
+    font-weight:bold;
+  }
+
+  .table {
+    overflow: auto;
+    min-height: 300px;
+  }
+  
+  .loading-shade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 56px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+ .pagination{
+     margin-right: 10px;
+ }
+
+ .highlight{
+    background : rgb(150, 143, 241);
+ }
+ .cellhighlight{
+     color:white;
+   
+ }
