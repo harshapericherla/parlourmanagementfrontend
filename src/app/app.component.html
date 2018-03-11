@@ -1,1 +1,11 @@
-<service-report></service-report>
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+        <button mat-raised-button color="primary" [routerLink]="['/servicereport']" >ServiceReport</button>
+        <button mat-raised-button color="primary" [routerLink]="['/services']">Services</button>
+    </mat-toolbar-row>
+</mat-toolbar>
+
+<div class="container">
+    <router-outlet></router-outlet>
+</div>
+

@@ -1,0 +1,88 @@
+<mat-tab-group>
+  <mat-tab label="Service">
+    <div class="container">
+      <div class="radio">
+        <mat-radio-group>
+           <mat-radio-button value="Add" [checked]="true" (click)="onChange('add')">Add</mat-radio-button>
+           <mat-radio-button value="Edit" (click)="onChange('edit')">Edit</mat-radio-button>
+           <mat-radio-button value="Delete" (click)="onChange('delete')">Delete</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+       <div class="container message" [ngStyle]="{color:color}">
+         {{message | uppercase}}
+       </div>
+
+        <div class="container" class="type" [ngSwitch]="type">
+            
+            <div *ngSwitchCase="'add'">
+                <form [formGroup]="serviceForm" class="addService" (ngSubmit)="onAddFormSubmit()">
+                  <div>
+                    <mat-form-field>
+                        <input type="text" matInput id="service" [formControl] = "serviceForm.controls['serviceName']" placeholder="Add Service" (blur)="applyCamelCase()">
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <mat-form-field >
+                        <input type="text" matInput [formControl] = "serviceForm.controls['serviceCost']" placeholder="Add Cost">
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <button type="submit" mat-raised-button color="primary" [disabled]="isSubmitDisabled">SUBMIT</button>
+                  </div>
+               </form>
+            </div>
+            <div *ngSwitchCase="'edit'">
+              <div class="container">
+                  <mat-form-field>
+                      <input type="text" #service matInput [formControl] = "serviceForm.controls['serviceName']" placeholder="Select Service"
+                       [matAutocomplete]="serviceauto">
+                  </mat-form-field>
+                  <mat-autocomplete #serviceauto="matAutocomplete"> 
+                      <mat-option *ngFor="let service of servicesFiltered | async" [value]="service" (blur)="selectService()">
+                        {{ service }}
+                      </mat-option>
+                  </mat-autocomplete>
+                  <div *ngIf="showForm == 'true'">
+                      <form [formGroup]="editForm"  (ngSubmit)="onEditFormSubmit()">
+                          <div>
+                            <mat-form-field>
+                                <input type="text" matInput id="service" [formControl] = "editForm.controls['serviceName']" placeholder="Edit Service" (blur)="applyCamelCase()">
+                            </mat-form-field>
+                          </div>
+                          <div>
+                            <mat-form-field >
+                                <input type="text" matInput [formControl] = "editForm.controls['serviceCost']" placeholder="Edit Cost">
+                            </mat-form-field>
+                          </div>
+                          <div>
+                            <button type="submit" mat-raised-button color="primary" [disabled]="isSubmitDisabled">EDIT</button>
+                          </div>
+                       </form>
+                  </div>
+              </div>
+
+            </div>
+            <div *ngSwitchCase="'delete'">
+              <div class="container">
+                <mat-form-field>
+                    <input type="text" #service matInput [formControl] = "serviceForm.controls['serviceName']" placeholder="Select Service"
+                     [matAutocomplete]="serviceauto">
+                </mat-form-field>
+                <mat-autocomplete #serviceauto="matAutocomplete"> 
+                    <mat-option *ngFor="let service of servicesFiltered | async" [value]="service" (blur)="selectService()">
+                      {{ service }}
+                    </mat-option>
+                </mat-autocomplete>
+                </div>
+              </div>
+        </div>
+
+        
+    </div>  
+    
+  </mat-tab>
+  <mat-tab label="Packages">
+      Content 2
+  </mat-tab>
+</mat-tab-group>

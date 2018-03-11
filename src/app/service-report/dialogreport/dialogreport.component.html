@@ -5,7 +5,7 @@
             
           <mat-form-field>
               <input type="text" id="service" matInput [formControl] = "addForm.controls['service']" placeholder="{{type | camelcase}} Service"
-               [matAutocomplete]="serviceauto"  (blur)="applyCamelCase('service')">
+               [matAutocomplete]="serviceauto"  (blur)="applyCamelCase('service')" multiple>
           </mat-form-field>
           <mat-autocomplete #serviceauto="matAutocomplete"> 
               <mat-option *ngFor="let service of servicesFiltered | async" [value]="service">

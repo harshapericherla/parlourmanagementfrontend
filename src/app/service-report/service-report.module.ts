@@ -63,7 +63,7 @@ const exportArr: any[] = [
   providers : [
     ServiceReportService,
     ClientService,
-    {provide: 'API_URL',useValue:'http://192.168.0.11:8001/parlourmanagementbackend/'},
+    {provide: 'API_URL',useValue:'http://localhost:8001/parlourmanagementbackend/'},
     {provide:'paginatorSize',useValue:'7'},
     ServicesService,
     StaffService,
