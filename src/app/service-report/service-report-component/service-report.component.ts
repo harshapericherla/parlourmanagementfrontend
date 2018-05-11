@@ -44,8 +44,11 @@ ngOnInit() {
     this.emitObject = new EventEmitter();
 }
 ngAfterViewInit(){
+    
     this.servieReportDatabase.getData(this.sort,this.paginator,this.emitObject,
       this.pageSize);
+
+    //used to subscribe to the emitObject which gets emitted in the getData Method
     this.emitObject.subscribe((obj: Object) => {
           
           let serviceReportBean;

@@ -87,24 +87,27 @@ export class ServiceReportDatabase {
                     obj['selectedRecord'] = null;
                     this.selectedServiceReport = data[0];
                 }
+                //Calls next on behaviour subject object which will add the data asynchronously
                 this.dataChange.next(data);
                 emitObject.emit(obj);
             });
     }
+    //Used to add the servicereport object 
     addData(bean: ServiceReport): void {
         this.service.addServiceReport(bean).
             subscribe((json: any) => {
+                //after adding used to emit an event thereby trigging the merge above
                 this.matSort.sortChange.emit();
             });
     }
-
+    //Used to edit the serviceReport Bean
     editData(bean: ServiceReport): void {
         this.service.editServiceReport(bean).
             subscribe((json: any) => {
                 this.matSort.sortChange.emit();
             });
     }
-
+    //Used to delete the serviceReport Bean
     deleteBean(bean: ServiceReport): void {
         this.service.deleteServiceReport(bean).
             subscribe((json: any) => {
