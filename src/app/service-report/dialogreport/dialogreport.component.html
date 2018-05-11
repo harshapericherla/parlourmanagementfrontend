@@ -2,16 +2,25 @@
   <h1 mat-dialog-title>{{type}} DETAILS</h1>
   <form [formGroup]="addForm">
       <div mat-dialog-content>
-            
+        <div *ngIf="type=='ADD'">
           <mat-form-field>
-              <input type="text" id="service" matInput [formControl] = "addForm.controls['service']" placeholder="{{type | camelcase}} Service"
-               [matAutocomplete]="serviceauto"  (blur)="applyCamelCase('service')" multiple>
+              <mat-select id="service" matInput [formControl] = "addForm.controls['service']" placeholder="{{type | camelcase}} Service"
+              multiple>
+               <mat-option *ngFor="let service of services" [value]="service">{{service}}</mat-option>
+              </mat-select>
           </mat-form-field>
-          <mat-autocomplete #serviceauto="matAutocomplete"> 
-              <mat-option *ngFor="let service of servicesFiltered | async" [value]="service">
-                {{ service }}
-              </mat-option>
-          </mat-autocomplete>
+        </div>
+        <div *ngIf="type=='EDIT'">
+        <mat-form-field>
+            <input type="text" id="service" matInput [formControl] = "addForm.controls['service']" placeholder="{{type | camelcase}} Service"
+             [matAutocomplete]="serviceauto"  (blur)="applyCamelCase('service')" multiple>
+        </mat-form-field>
+        <mat-autocomplete #serviceauto="matAutocomplete"> 
+            <mat-option *ngFor="let service of servicesFiltered | async" [value]="service">
+              {{ service }}
+            </mat-option>
+        </mat-autocomplete>
+      </div>
 
           <mat-form-field>
               <input type="text" matInput [formControl] = "addForm.controls['client']" placeholder="{{type | camelcase}} Client"
@@ -37,7 +46,18 @@
               </mat-option>
           </mat-autocomplete>
           
-          <div *ngIf="addForm.controls['service'].value">
+          <div *ngIf="servicesCost && type=='ADD'">
+            <div *ngFor="let service of servicesJson">
+              <mat-form-field>
+                <input type="text"  matInput placeholder="Cost of {{service.serviceName | camelcase}}" [formControl]="addForm.controls[service.serviceName]">
+              </mat-form-field>
+              <mat-form-field>
+                 <input type="text" #discount matInput placeholder="Discount of {{service.serviceName | camelcase}}"  [formControl] = "addForm.controls['discount'+service.serviceName]" (blur)="applyDiscount(discount,service.serviceName)" (click)="clearDiscount(discount)">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div *ngIf="addForm.controls['service'].value && type=='EDIT'">
             <mat-form-field >
                     <input type="text" matInput [formControl] = "addForm.controls['serviceCost']" placeholder="{{type | camelcase}} Cost">
             </mat-form-field>

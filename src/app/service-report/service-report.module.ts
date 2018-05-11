@@ -11,7 +11,7 @@ import { MatDialogModule,MatFormFieldModule,
         MatPaginatorModule,MatSortModule, 
         MatProgressSpinnerModule,MatCardModule,
         MatChipsModule,MatAutocompleteModule,
-        MatDatepickerModule,MatNativeDateModule} from '@angular/material';
+        MatDatepickerModule,MatNativeDateModule, MatSelectModule} from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { DialogreportComponent } from './dialogreport/dialogreport.component';
 import {MatTableModule} from '@angular/material/table';
@@ -57,7 +57,8 @@ const exportArr: any[] = [
     MatCardModule,
     MatAutocompleteModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatSelectModule
   ],
   declarations: components,
   providers : [
