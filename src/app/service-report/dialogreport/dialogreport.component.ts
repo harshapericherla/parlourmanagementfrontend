@@ -1,6 +1,6 @@
-import { Component, OnInit, Inject, EventEmitter } from '@angular/core';
+import { Component, OnInit, Inject, EventEmitter,ElementRef,ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { FormBuilder,FormGroup,Validators } from '@angular/forms';
+import { FormBuilder,FormGroup,Validators,FormControl } from '@angular/forms';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 import { ClientService } from '../../services/client.service';
@@ -9,10 +9,10 @@ import { StaffService } from '../../services/staff.service';
 import { Service } from '../../models/service.model';
 import { Client } from '../../models/client.model';
 import { Staff } from '../../models/staff.model';
-import { FormControl } from '@angular/forms/src/model';
 import { CamelCasePipe } from '../Pipes/camelCase';
 import * as $ from 'jquery';
 import { ServiceReport } from '../../models/servicereport.model';
+
 
 @Component({
   selector: 'dialog-report',
@@ -26,9 +26,11 @@ export class DialogreportComponent implements OnInit {
   newServiceCost: number;
   oldServiceCost: string;
   isSubmitEnabled: boolean = false;
+  isChanged: boolean = false;
   addForm: FormGroup;
   type: string;
   services: any;
+  servicesCost: any;
   servicesFiltered: any;
   clients: any;
   clientsFiltered: any;
@@ -37,9 +39,10 @@ export class DialogreportComponent implements OnInit {
   servicesJson: Service[];
   clientJson: Client[];
   staffJson: Staff[];
-  
+  formControlNames: any[] =[];
   serviceMap = {};
   serviceCostMap = {};
+  serviceCostUpdatedMap = {};
   clientPhoneMap = {};
   clientMap = {};
   staffMap = {};
@@ -47,6 +50,7 @@ export class DialogreportComponent implements OnInit {
   serviceChangeId:number;
   clientChangeId:number;
   staffChangeId:number;
+
   constructor(
     public dialogRef: MatDialogRef<DialogreportComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -104,11 +108,13 @@ export class DialogreportComponent implements OnInit {
                    services.push(serviceName);
                }
                this.services = services;
+
                this.servicesFiltered = this.addForm.controls['service'].valueChanges.
                pipe(startWith(''),map(val => {
                                         this.resetServiceIdChange(val);
                                         return this.filterService(val);
                                     }));
+
          });
         
          this.clientService.getAllClients().subscribe((json:Client[]) => {
@@ -152,7 +158,7 @@ export class DialogreportComponent implements OnInit {
             let phoneNumber = this.addForm.controls['phoneNumber'].value;
             let serviceCost = Number(this.addForm.controls['serviceCost'].value);
           
-            if(this.type == 'ADD' && this.addForm.valid &&  serviceReportDate != null && phoneNumber && serviceCost != 0)
+            if(this.type == 'ADD' && this.addForm.valid &&  serviceReportDate != null && phoneNumber)
                   this.isSubmitEnabled = true;
             else if(this.type == 'EDIT' && this.isDetailsChanged())
                   this.isSubmitEnabled = true;
@@ -162,14 +168,25 @@ export class DialogreportComponent implements OnInit {
       
 
          this.addForm.controls['service'].valueChanges.subscribe(() => {
-               let serviceName = this.addForm.controls['service'].value;
-               let serviceCost = this.serviceCostMap[serviceName];
-               this.oldServiceCost = serviceCost;
-               if(serviceCost){
-                  this.addForm.controls['serviceCost'].reset(serviceCost);
+
+               let serviceNames = this.addForm.controls['service'].value;
+               let serviceCosts = [];
+               let serviceCost = 0;
+               let serviceName:string;
+               // emptying the update map
+               this.serviceCostUpdatedMap = {};
+               for(let i=0;i<serviceNames.length;i++){
+                    
+                    serviceName = serviceNames[i];
+                    serviceCost =  this.serviceCostMap[serviceName];
+                    serviceCosts.push(serviceCost);
+                    this.serviceCostUpdatedMap[serviceName] = serviceCost;
                }
+               this.servicesCost = serviceCosts;
+               this.updateServiceJson();
          });
-        
+       
+
         this.addForm.controls['client'].valueChanges.subscribe(() => {
                let clientName = this.addForm.controls['client'].value;
                let clientNumber = this.clientPhoneMap[clientName];
@@ -178,76 +195,165 @@ export class DialogreportComponent implements OnInit {
                }
         });
 
-         this.addForm.controls['serviceCost'].valueChanges.subscribe( () => {
-               let oldServiceCost: number = Number(this.oldServiceCost);
-               let serviceCost: number = Number(this.addForm.controls['serviceCost'].value);
+    // logic when servicecost is changed in the edit section
+    this.addForm.controls['serviceCost'].valueChanges.subscribe( () => {
+          let oldServiceCost: number = Number(this.oldServiceCost);
+          let serviceCost: number = Number(this.addForm.controls['serviceCost'].value);
 
-               if(!isNaN(oldServiceCost) && this.newServiceCost != serviceCost){
-                  let percent: number = (oldServiceCost-serviceCost)*100/oldServiceCost;
-                  this.newPercent = percent;
-                  this.addForm.controls['serviceDiscount'].reset(percent);
-                  this.newServiceCost = serviceCost;
-               }
- 
-         });
+          if(!isNaN(oldServiceCost) && this.newServiceCost != serviceCost){
+             let percent: number = (oldServiceCost-serviceCost)*100/oldServiceCost;
+             this.newPercent = percent;
+             this.addForm.controls['serviceDiscount'].reset(percent);
+             this.newServiceCost = serviceCost;
+          }
 
-         this.addForm.controls['serviceDiscount'].valueChanges.subscribe( () => {
-               
-              let oldServiceCost: number = Number(this.oldServiceCost);
-              let discount: number = Number(this.addForm.controls['serviceDiscount'].value);
-              let serviceCost = this.addForm.controls['serviceCost'].value;
-              if(this.newPercent != discount){  
-                serviceCost = oldServiceCost - ((oldServiceCost * discount)/100);
-                this.newServiceCost = serviceCost;
-                this.addForm.controls['serviceCost'].reset(serviceCost);
-                this.newPercent = discount;
-              }  
-         })
+    });
+    // logic when serviceDiscount is changed in the edit section
+    this.addForm.controls['serviceDiscount'].valueChanges.subscribe( () => {
+          
+         let oldServiceCost: number = Number(this.oldServiceCost);
+         let discount: number = Number(this.addForm.controls['serviceDiscount'].value);
+         let serviceCost = this.addForm.controls['serviceCost'].value;
+         if(this.newPercent != discount){  
+           serviceCost = oldServiceCost - ((oldServiceCost * discount)/100);
+           this.newServiceCost = serviceCost;
+           this.addForm.controls['serviceCost'].reset(serviceCost);
+           this.newPercent = discount;
+         }  
+    })
+        
     }
+  
+  // upates the servicejson with the costs
+  updateServiceJson(){
+      this.servicesJson = [];
+      for (var serviceName in this.serviceCostUpdatedMap) {
+        if (this.serviceCostUpdatedMap.hasOwnProperty(serviceName)) {
+          this.updateFormControl(serviceName);
+          this.servicesJson.push(new Service(this.serviceMap[serviceName],serviceName, this.serviceCostUpdatedMap[serviceName]));
+        }
+      }
+  }
+  
+  updateFormControl(serviceName){
+    
+    this.updateServiceCost(serviceName);
+    this.updateDiscountControl(serviceName);
+  }
 
-   
+ // updating the service form
+ updateServiceCost(serviceName){
+    let formControlName = serviceName;
+    let cost = this.serviceCostUpdatedMap[formControlName];
+    if(this.updateFormControlName(formControlName)){
+    
+      this.addForm.addControl(formControlName,new FormControl(cost));
+      this.addForm.controls[formControlName].valueChanges.subscribe( () => {
+         if(!this.isChanged){
+            let serviceName = formControlName;
+            let serviceCost = this.addForm.controls[formControlName].value;
+            let oldServiceCost = this.serviceCostUpdatedMap[formControlName];
+            let discount  = (oldServiceCost-serviceCost)*100/oldServiceCost;
+            this.isChanged = true;
+            this.addForm.controls['discount'+serviceName].reset(discount);
+            this.isChanged = false;
+            
+         }
+      });
+    } 
+ }
+
+ // updating the discount form
+  updateDiscountControl(serviceName){
+    let formControlName = 'discount'+serviceName;
+    if(this.updateFormControlName(formControlName)){
+
+      this.addForm.addControl(formControlName,new FormControl('0'));
+      this.addForm.controls[formControlName].valueChanges.subscribe( () => {
+        if(!this.isChanged){
+              let discount = this.addForm.controls[formControlName].value;
+              discount = Number(discount);
+              let localServiceCost = this.serviceCostMap[serviceName];
+              localServiceCost = localServiceCost - ((localServiceCost * discount)/100);
+              this.isChanged = true;
+              this.addForm.controls[serviceName].reset(localServiceCost);
+              this.isChanged = false;
+        }   
+      });
+    }
+  }
+
+//push form Control name
+updateFormControlName(serviceName) : boolean{
+  
+  for(let i=0;i<this.formControlNames.length;i++){
+      if(serviceName == this.formControlNames[i]){
+           return false;
+      }
+  }
+  this.formControlNames.push(serviceName);
+  return true;
+}
+
+  // if the discount is 0 and got clicked it will empty
+  clearDiscount(discount: HTMLInputElement){
+
+     if(discount.value == '0'){
+         discount.value = '';
+     }
+  }
+  
+  // if the mouse is out of foucs from the discount it restores the value as zero
+  applyDiscount(discount: HTMLInputElement,serviceName: string){
+     if(discount.value == ''){
+         discount.value = '0';
+     }
+  }
+
   isDetailsChanged(){
        
      let formClientFullName = this.addForm.controls['client'].value;
      let originalClientFullName = this.selectedServiceBean.clientBean.fullName;
-     if(formClientFullName != originalClientFullName){
+     if(formClientFullName != originalClientFullName && formClientFullName){
          return true;
-     }
-     let formService = this.addForm.controls['service'].value;
-     let originalService = this.selectedServiceBean.serviceBean.serviceName;
-     if(formService != originalService){
-        return true;
      }
 
      let formPhone = this.addForm.controls['phoneNumber'].value;
      let originalPhone = this.selectedServiceBean.clientBean.phoneNumber;
-     if(formPhone != originalPhone){
+     if(formPhone != originalPhone && formPhone){
         return true;
      }
 
      let formStaff = this.addForm.controls['staff'].value;
      let originalStaff = this.selectedServiceBean.staffBean.staffName;
-     if(formStaff != originalStaff){
+     if(formStaff != originalStaff && formStaff){
         return true;
-     }
-
-     let formCost = this.addForm.controls['serviceCost'].value;
-     let originalCost = this.selectedServiceBean.serviceBean.serviceCost;
-     if(formCost != originalCost){
-       return true;
-     }
-
-     let formDiscount = this.addForm.controls['serviceDiscount'].value;
-     let originalDiscount = this.selectedServiceBean.serviceDiscount;
-     if(formDiscount != originalDiscount){
-       return true;
      }
 
      let formDate: Date =  new Date(this.addForm.controls['serviceReportDate'].value);
      let originalDate: Date = new Date(this.selectedServiceBean.serviceReportDate);
-     if(formDate.getTime() != originalDate.getTime()){
+     if(formDate.getTime() != originalDate.getTime() && formDate){
        return true;
      }
+
+     let formService = this.addForm.controls['service'].value;
+     let originalService = this.selectedServiceBean.serviceBean.serviceName;
+     if(formService != originalService && formService){
+        return true;
+     }
+
+     let formDiscount = this.addForm.controls['serviceDiscount'].value;
+     let originalDiscount = this.selectedServiceBean.serviceDiscount;
+     if(formDiscount != originalDiscount && formDiscount){
+       return true;
+     }
+
+     let formCost = this.addForm.controls['serviceCost'].value;
+     let originalCost = this.selectedServiceBean.serviceBean.serviceCost;
+     if(formCost != originalCost && formCost){
+       return true;
+     }
+
   }
 
   oldServiceCostIsNaN(){
@@ -264,15 +370,18 @@ export class DialogreportComponent implements OnInit {
      return this.addForm.get('staff');
   }
 
+
   ngOnInit() {  
+    
+  }
+
+  filterService(val: string): string[] {
+    return this.services.filter(option =>
+      option.toLowerCase().indexOf(val.toLowerCase()) === 0);
   }
 
   filterStaff(val: string): string[] {
     return this.staffs.filter(option =>
-      option.toLowerCase().indexOf(val.toLowerCase()) === 0);
-  }
-  filterService(val: string): string[] {
-    return this.services.filter(option =>
       option.toLowerCase().indexOf(val.toLowerCase()) === 0);
   }
   filterClient(val: string): string[] {

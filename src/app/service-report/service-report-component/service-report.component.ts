@@ -97,11 +97,15 @@ ngAfterViewInit(){
       dialogRef.afterClosed().subscribe( (value) => {
 
           if(value){
-
-             let serviceReportBean: ServiceReport = this.populateFormDetails(value);
              if(type == 'add'){
-                this.submitData(serviceReportBean);
+
+                let serviceReportBeans :ServiceReport[] = this.populateFormDetailsForAdd(value); 
+                for(let i=0;i<serviceReportBeans.length;i++){
+                  this.isLoadingResults = true;
+                  this.submitData(serviceReportBeans[i]);
+                }
              }else{
+                let serviceReportBean: ServiceReport = this.populateFormDetails(value);
                 serviceReportBean.serviceReportId = this.selectedServiceReport.serviceReportId;
                 serviceReportBean.clientBean.clientId = value.clientId;
                 serviceReportBean.serviceBean.serviceId = value.serviceId;
@@ -143,8 +147,30 @@ ngAfterViewInit(){
     );
     return serviceReportBean;
   }
+
+  // populating form details for add
+  populateFormDetailsForAdd(value: any): ServiceReport[]{
+    
+    let serviceReportBeans:ServiceReport[] = [];
+    let services:string[] = value.service;
+    for(let i=0;i<services.length;i++){
+            
+            let serviceName = services[i];
+            let discount = value['discount'+serviceName];
+            let serviceCost = value[serviceName];
+            let clientBean = new Client(0,'','',value.client,value.phoneNumber);
+            let serviceBean = new Service(0,serviceName,serviceCost);
+            let staffBean = new Staff(0,value.staff,'');
+            let serviceReportBean = new ServiceReport(
+               0,clientBean,serviceBean,staffBean,discount,value.serviceReportDate
+             ); 
+            serviceReportBeans.push(serviceReportBean);
+    }
+    return serviceReportBeans;
+  }
+
   populateFormDetails(value: any): ServiceReport{
-   
+
        let clientBean = new Client(0,'','',value.client,value.phoneNumber);
        let serviceBean = new Service(0,value.service,value.serviceCost);
        let staffBean = new Staff(0,value.staff,'');
