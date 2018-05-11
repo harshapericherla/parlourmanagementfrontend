@@ -38,8 +38,9 @@ export class ServiceReportComponent implements OnInit{
     isLoadingResults: boolean;
 
 ngOnInit() {
-
+    // Intilalizing the dataSource by passing serviceReportDatabase provider
     this.dataSource = new ServiceReportDataSource(this.servieReportDatabase); 
+    // Creating eventEmitter object
     this.emitObject = new EventEmitter();
 }
 ngAfterViewInit(){
@@ -160,11 +161,15 @@ ngAfterViewInit(){
   editData(bean: ServiceReport){
     this.servieReportDatabase.editData(bean);
   }
-
+  
+  // Whenever a row gets clicked this is called
   rowSelected(row: ServiceReport){
-     
+       
+       // setting the row index
        this.selectedRowIndex = row.serviceReportId;
+       // setting the selectedServiceReportBean
        this.selectedServiceReport = row;
+       // setting the selectedServiceReportBean for the serviceDatabase component
        this.servieReportDatabase.setSelectedServiceReport(row);
   }
 }
