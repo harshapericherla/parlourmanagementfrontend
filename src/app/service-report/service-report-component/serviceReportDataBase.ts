@@ -40,12 +40,12 @@ export class ServiceReportDatabase {
         this.matSort.sortChange.subscribe(() => this.matPaginator.pageIndex = 0);
         //Creating a new object which will be emitted by the EventEmitter
         let obj = new Object();
-        
+
         merge(this.matSort.sortChange, this.matPaginator.page)
             .pipe(
             startWith({}),
             switchMap(() => {
-                
+
                 if (this.selectedServiceReport) {
                     obj['selectedRecord'] = this.selectedServiceReport;
                     obj['firstRecord'] = null;
@@ -73,13 +73,7 @@ export class ServiceReportDatabase {
                 if (this.selectedServiceReport) {
                     let json = data;
                     let selectedId = this.selectedServiceReport.serviceReportId;
-
-                    for (let element of json) {
-                        if (element.serviceReportId == selectedId) {
-                            this.selectedServiceReport = element;
-                            break;
-                        }
-                    }
+                    this.selectedServiceReport = data[0];
                     obj['selectedRecord'] = this.selectedServiceReport;
                     obj['firstRecord'] = null;
                 } else {
