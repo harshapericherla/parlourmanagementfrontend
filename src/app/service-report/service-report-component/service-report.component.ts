@@ -1,4 +1,4 @@
-import {Component, ViewChild,EventEmitter, Input,Inject} from '@angular/core';
+import { Component, ViewChild, EventEmitter, Input, Inject } from '@angular/core';
 import { ServiceReportService } from '../../services/service-report.service';
 import { ClientService } from '../../services/client.service';
 import { ServiceReport } from '../../models/servicereport.model';
@@ -8,7 +8,7 @@ import { Service } from '../../models/service.model';
 import { Client } from '../../models/client.model';
 import { Staff } from '../../models/staff.model';
 import { OnInit } from '@angular/core';
-import {  ServiceReportDataSource } from './serviceReportDataSource';
+import { ServiceReportDataSource } from './serviceReportDataSource';
 import { ServiceReportDatabase } from './serviceReportDataBase';
 import { DialogdeleteComponent } from '../dialogdelete/dialogdelete.component';
 
@@ -18,187 +18,188 @@ import { DialogdeleteComponent } from '../dialogdelete/dialogdelete.component';
   templateUrl: './service-report.component.html',
   styleUrls: ['./service-report.component.css']
 })
-export class ServiceReportComponent implements OnInit{
-  
-  
-    
-    @ViewChild(MatPaginator) paginator: MatPaginator;
-    @ViewChild(MatSort) sort: MatSort;
+export class ServiceReportComponent implements OnInit {
 
-    selectedServiceReport: ServiceReport
-    selectedRowIndex: number = -1;
-    resultsLength: number;
-    dataSource: ServiceReportDataSource | null;
-    displayedColumns: string[];
-    serviceBean: Service;
-    clientBean: Client;
-    staffBean: Staff;
-    serviceReportBean: ServiceReport;
-    emitObject: EventEmitter<Object>;
-    isLoadingResults: boolean;
 
-ngOnInit() {
-    // Intilalizing the dataSource by passing serviceReportDatabase provider
-    this.dataSource = new ServiceReportDataSource(this.servieReportDatabase); 
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+
+  selectedServiceReport: ServiceReport
+  selectedRowIndex: number = -1;
+  resultsLength: number;
+  dataSource: ServiceReportDataSource | null;
+  displayedColumns: string[];
+  serviceBean: Service;
+  clientBean: Client;
+  staffBean: Staff;
+  serviceReportBean: ServiceReport;
+  emitObject: EventEmitter<Object>;
+  isLoadingResults: boolean;
+
+  ngOnInit() {
+    /* Intilalizing the dataSource by passing serviceReportDatabase provider , 
+    dataSource is being used in the view page to display the data*/
+    this.dataSource = new ServiceReportDataSource(this.servieReportDatabase);
     // Creating eventEmitter object
     this.emitObject = new EventEmitter();
-}
-ngAfterViewInit(){
-    
-    this.servieReportDatabase.getData(this.sort,this.paginator,this.emitObject,
+  }
+  ngAfterViewInit() {
+
+    this.servieReportDatabase.getData(this.sort, this.paginator, this.emitObject,
       this.pageSize);
 
     //used to subscribe to the emitObject which gets emitted in the getData Method
     this.emitObject.subscribe((obj: Object) => {
-          
-          let serviceReportBean;
-         
-          if(obj['selectedRecord']){
-            serviceReportBean = obj['selectedRecord'];
-          }else{
-            serviceReportBean = obj['firstRecord'];
-          }
-        
-          if(serviceReportBean){
-            let totalRecords = serviceReportBean.totalRecords;
-            let recordId = serviceReportBean.serviceReportId;
 
-            if(totalRecords){
-                 this.resultsLength = totalRecords;
-            }
-            this.selectedRowIndex = recordId;
-            this.selectedServiceReport = serviceReportBean;
-         
-          }
-          let isLoadingResults = obj['isLoadingResults'];
-          this.isLoadingResults = isLoadingResults;
+      let serviceReportBean;
+
+      if (obj['selectedRecord']) {
+        serviceReportBean = obj['selectedRecord'];
+      } else {
+        serviceReportBean = obj['firstRecord'];
+      }
+
+      if (serviceReportBean) {
+        let totalRecords = serviceReportBean.totalRecords;
+        let recordId = serviceReportBean.serviceReportId;
+
+        if (totalRecords) {
+          this.resultsLength = totalRecords;
+        }
+        this.selectedRowIndex = recordId;
+        this.selectedServiceReport = serviceReportBean;
+
+      }
+      let isLoadingResults = obj['isLoadingResults'];
+      this.isLoadingResults = isLoadingResults;
     });
-    
-}
-  constructor(public dialog: MatDialog,public service: ServiceReportService,
-              @Inject('paginatorSize')public pageSize: number,
-              public servieReportDatabase: ServiceReportDatabase){
 
-      this.displayedColumns = ["Client","Service","Staff","Cost"];
-      this.isLoadingResults = true;
   }
- 
-  openDialog(type: string): void{
-      
-     let ob: Object;
-     if(type == 'add'){
-         ob = this.getEmptyServiceBean();
-     }else{
-         ob = this.selectedServiceReport
-     }
-     ob['type'] = type;
-     this.isLoadingResults = true;
-      let dialogRef = this.dialog.open(DialogreportComponent,{
-        width: '350px',
-        data: ob
-      });
+  constructor(public dialog: MatDialog, public service: ServiceReportService,
+    @Inject('paginatorSize') public pageSize: number,
+    public servieReportDatabase: ServiceReportDatabase) {
 
-      dialogRef.afterClosed().subscribe( (value) => {
-
-          if(value){
-             if(type == 'add'){
-
-                let serviceReportBeans :ServiceReport[] = this.populateFormDetailsForAdd(value); 
-                for(let i=0;i<serviceReportBeans.length;i++){
-                  this.isLoadingResults = true;
-                  this.submitData(serviceReportBeans[i]);
-                }
-             }else{
-                let serviceReportBean: ServiceReport = this.populateFormDetails(value);
-                serviceReportBean.serviceReportId = this.selectedServiceReport.serviceReportId;
-                serviceReportBean.clientBean.clientId = value.clientId;
-                serviceReportBean.serviceBean.serviceId = value.serviceId;
-                serviceReportBean.staffBean.staffId = value.staffId;
-                serviceReportBean.serviceBean.serviceCost = value.serviceCost;
-                serviceReportBean.serviceReportDate = value.serviceReportDate;
-                this.editData(serviceReportBean);
-             }
-          }
-          else{
-            this.isLoadingResults = false;
-          }
-      });
-  }
-
-  openDeleteDialog(): void{
-       
+    this.displayedColumns = ["Client", "Service", "Staff", "Cost"];
     this.isLoadingResults = true;
-    let dialogRef = this.dialog.open(DialogdeleteComponent,{
-        width: '350px'
-    });
-    dialogRef.afterClosed().subscribe( (value) => {
+  }
+  // function gets invoked when clicked on add or edit
+  openDialog(type: string): void {
 
-        if(value){
-           this.servieReportDatabase.deleteBean(this.selectedServiceReport);
+    let ob: Object;
+    if (type == 'add') {
+      ob = this.getEmptyServiceBean();
+    } else {
+      ob = this.selectedServiceReport
+    }
+    ob['type'] = type;
+    this.isLoadingResults = true;
+    let dialogRef = this.dialog.open(DialogreportComponent, {
+      width: '350px',
+      data: ob
+    });
+
+    dialogRef.afterClosed().subscribe((value) => {
+
+      if (value) {
+        if (type == 'add') {
+
+          let serviceReportBeans: ServiceReport[] = this.populateFormDetailsForAdd(value);
+          for (let i = 0; i < serviceReportBeans.length; i++) {
+            this.isLoadingResults = true;
+            this.submitData(serviceReportBeans[i]);
+          }
+        } else {
+          let serviceReportBean: ServiceReport = this.populateFormDetails(value);
+          serviceReportBean.serviceReportId = this.selectedServiceReport.serviceReportId;
+          serviceReportBean.clientBean.clientId = value.clientId;
+          serviceReportBean.serviceBean.serviceId = value.serviceId;
+          serviceReportBean.staffBean.staffId = value.staffId;
+          serviceReportBean.serviceBean.serviceCost = value.serviceCost;
+          serviceReportBean.serviceReportDate = value.serviceReportDate;
+          this.editData(serviceReportBean);
         }
-        else{
-          this.isLoadingResults = false;
-        }
+      }
+      else {
+        this.isLoadingResults = false;
+      }
     });
   }
-  
-  getEmptyServiceBean(): ServiceReport{
-    let clientBean = new Client(0,'','','','');
-    let serviceBean = new Service(0,'','');
-    let staffBean = new Staff(0,'','');
+  // function gets invoked when cliked on deletes
+  openDeleteDialog(): void {
+
+    this.isLoadingResults = true;
+    let dialogRef = this.dialog.open(DialogdeleteComponent, {
+      width: '350px'
+    });
+    dialogRef.afterClosed().subscribe((value) => {
+
+      if (value) {
+        this.servieReportDatabase.deleteBean(this.selectedServiceReport);
+      }
+      else {
+        this.isLoadingResults = false;
+      }
+    });
+  }
+
+  getEmptyServiceBean(): ServiceReport {
+    let clientBean = new Client(0, '', '', '', '');
+    let serviceBean = new Service(0, '', '');
+    let staffBean = new Staff(0, '', '');
     let serviceReportBean = new ServiceReport(
-      0,clientBean,serviceBean,staffBean,'0',null
+      0, clientBean, serviceBean, staffBean, '0', null
     );
     return serviceReportBean;
   }
 
   // populating form details for add
-  populateFormDetailsForAdd(value: any): ServiceReport[]{
-    
-    let serviceReportBeans:ServiceReport[] = [];
-    let services:string[] = value.service;
-    for(let i=0;i<services.length;i++){
-            
-            let serviceName = services[i];
-            let discount = value['discount'+serviceName];
-            let serviceCost = value[serviceName];
-            let clientBean = new Client(0,'','',value.client,value.phoneNumber);
-            let serviceBean = new Service(0,serviceName,serviceCost);
-            let staffBean = new Staff(0,value.staff,'');
-            let serviceReportBean = new ServiceReport(
-               0,clientBean,serviceBean,staffBean,discount,value.serviceReportDate
-             ); 
-            serviceReportBeans.push(serviceReportBean);
+  populateFormDetailsForAdd(value: any): ServiceReport[] {
+
+    let serviceReportBeans: ServiceReport[] = [];
+    let services: string[] = value.service;
+    for (let i = 0; i < services.length; i++) {
+
+      let serviceName = services[i];
+      let discount = value['discount' + serviceName];
+      let serviceCost = value[serviceName];
+      let clientBean = new Client(0, '', '', value.client, value.phoneNumber);
+      let serviceBean = new Service(0, serviceName, serviceCost);
+      let staffBean = new Staff(0, value.staff, '');
+      let serviceReportBean = new ServiceReport(
+        0, clientBean, serviceBean, staffBean, discount, value.serviceReportDate
+      );
+      serviceReportBeans.push(serviceReportBean);
     }
     return serviceReportBeans;
   }
 
-  populateFormDetails(value: any): ServiceReport{
+  populateFormDetails(value: any): ServiceReport {
 
-       let clientBean = new Client(0,'','',value.client,value.phoneNumber);
-       let serviceBean = new Service(0,value.service,value.serviceCost);
-       let staffBean = new Staff(0,value.staff,'');
-       let serviceReportBean = new ServiceReport(
-         0,clientBean,serviceBean,staffBean,value.serviceDiscount,value.serviceReportDate
-       );
-       return serviceReportBean;
+    let clientBean = new Client(0, '', '', value.client, value.phoneNumber);
+    let serviceBean = new Service(0, value.service, value.serviceCost);
+    let staffBean = new Staff(0, value.staff, '');
+    let serviceReportBean = new ServiceReport(
+      0, clientBean, serviceBean, staffBean, value.serviceDiscount, value.serviceReportDate
+    );
+    return serviceReportBean;
   }
-  submitData(bean: ServiceReport){
+  submitData(bean: ServiceReport) {
     this.servieReportDatabase.addData(bean);
   }
 
-  editData(bean: ServiceReport){
+  editData(bean: ServiceReport) {
     this.servieReportDatabase.editData(bean);
   }
-  
+
   // Whenever a row gets clicked this is called
-  rowSelected(row: ServiceReport){
-       
-       // setting the row index
-       this.selectedRowIndex = row.serviceReportId;
-       // setting the selectedServiceReportBean
-       this.selectedServiceReport = row;
-       // setting the selectedServiceReportBean for the serviceDatabase component
-       this.servieReportDatabase.setSelectedServiceReport(row);
+  rowSelected(row: ServiceReport) {
+
+    // setting the row index
+    this.selectedRowIndex = row.serviceReportId;
+    // setting the selectedServiceReportBean
+    this.selectedServiceReport = row;
+    // setting the selectedServiceReportBean for the serviceDatabase component
+    this.servieReportDatabase.setSelectedServiceReport(row);
   }
 }

@@ -65,7 +65,7 @@ const exportArr: any[] = [
     ServiceReportService,
     ClientService,
     {provide: 'API_URL',useValue:'http://localhost:8001/parlourmanagementbackend/'},
-    {provide:'paginatorSize',useValue:'7'},
+    {provide:'paginatorSize',useValue:'6'},
     ServicesService,
     StaffService,
     CamelCasePipe,
