@@ -19,7 +19,7 @@ import { ServiceReport } from '../../models/servicereport.model';
   templateUrl: './dialogreport.component.html',
   styleUrls: ['./dialogreport.component.css']
 })
-export class DialogreportComponent implements OnInit {
+export class DialogreportComponent{
   
   selectedServiceBean: ServiceReport;
   newPercent: number;
@@ -73,7 +73,6 @@ export class DialogreportComponent implements OnInit {
               'serviceDiscount':[data.serviceDiscount],
               'serviceReportDate':[data.serviceReportDate,Validators.required]
          });
-       
         this.selectedServiceBean = data;
 
         let serviceReportDate = data.serviceReportDate;
@@ -360,6 +359,7 @@ updateFormControlName(serviceName) : boolean{
      return isNaN(Number(this.oldServiceCost));
   }
 
+  // below methods is used to get the properties which are used in the view page
   get service(){
      return this.addForm.get('service');
   }
@@ -368,11 +368,6 @@ updateFormControlName(serviceName) : boolean{
   }
   get staff(){
      return this.addForm.get('staff');
-  }
-
-
-  ngOnInit() {  
-    
   }
 
   filterService(val: string): string[] {

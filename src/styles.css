@@ -1,3 +1,16 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~bootstrap/dist/css/bootstrap.css';
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+.error{
+    color: red;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 80%;
+}
+.error-snackbar{
+ 
+    color:white;
+    font-size:80%;
+    font-weight: bold;
+}

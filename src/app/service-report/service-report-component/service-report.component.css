@@ -27,11 +27,6 @@
     font-weight:bold;
   }
 
-  .table {
-    overflow: auto;
-    min-height: 300px;
-  }
-  
   .loading-shade {
     position: absolute;
     top: 0;

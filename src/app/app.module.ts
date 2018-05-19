@@ -15,6 +15,11 @@ import {MatMenuModule,MatToolbarModule,
 import { ServicesComponent } from './services-component/services-component.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule} from '@angular/common';
+import { HandleError } from './common/ErrorHandling/HandleError';
+import { ErrorHandler } from '@angular/core';
+import { AppErrorHandler } from './common/ErrorHandling/AppErrorHandler';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { LoggerService } from './common/ErrorHandling/LoggerService';
 
 const routes: Routes =[
   { path: 'servicereport', component: ServiceReportComponent },
@@ -40,11 +45,14 @@ const routes: Routes =[
     MatInputModule,
     CommonModule,
     MatRadioModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatSnackBarModule
   ],
-  providers: [Constants],
+  providers: [Constants,HandleError,{provide:ErrorHandler,useClass:AppErrorHandler},LoggerService],
   exports:[HttpModule],
   bootstrap: [AppComponent]
 })
 
-export class AppModule { }
+export class AppModule {
+
+}

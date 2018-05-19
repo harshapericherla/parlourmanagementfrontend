@@ -84,6 +84,10 @@ export class ServiceReportDatabase {
                 //Calls next on behaviour subject object which will add the data asynchronously
                 this.dataChange.next(data);
                 emitObject.emit(obj);
+            },(error) => {
+                obj['isLoadingResults'] = false;
+                emitObject.emit(obj);
+                throw error;
             });
     }
     //Used to add the servicereport object 
